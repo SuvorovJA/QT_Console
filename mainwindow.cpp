@@ -57,7 +57,7 @@ void MainWindow::startButtonClicked()
 {
 
     //выключить стартовую кнопку
-    ui->startButton->setDisabled(true);
+    // ui->startButton->setDisabled(true);
     //очистить поле текста и статусбар
     ui->textBrowser->clear();
     ui->statusBar->clearMessage();
@@ -112,42 +112,22 @@ void MainWindow::fontComboBoxSelected()
     ui->textBrowser->update();
 }
 
+
+//
+
+
 void MainWindow::catchStreamCout() // этот метод запускается по таймеру
 {
     timerCout->stop(); // выключить таймер пока мы тут
-    bool catched     = false; // индикатор необходимости обновить браузер
-    // пустой или нет?
-    // "ssout.rdbuf()->in_avail() > 0" - способ обнаружить символы в потоке
-    (ssout.rdbuf()->in_avail() > 0) ? catched = true : catched = false;
-    while (ssout.rdbuf()->in_avail() > 0) {
-        ui->textBrowser->insertPlainText(mygetline(ssout)); //докинуть в текстбраузер
-    }
-    if (catched) {
-        ui->textBrowser->update(); // обновить браузер
-    }
+    streamBufferToBrowser(ssout, Qt::white);
     timerCout->start(timerDelay); // включить таймер назад
 }
 
 void MainWindow::catchStreamCerr() // этот метод запускается по таймеру
 {
     timerCerr->stop();
-    bool catched_err     = false; // индикатор необходимости обновить браузер
-    bool catched_log     = false; // индикатор необходимости обновить браузер
-    // пустой или нет?
-    (sserr.rdbuf()->in_avail() > 0) ? catched_err = true : catched_err = false;
-    if (catched_err) ui->textBrowser->setTextColor(Qt::red);
-    while (sserr.rdbuf()->in_avail() > 0) {
-        ui->textBrowser->insertPlainText(mygetline(sserr)); //докинуть в текстбраузер
-    }
-    (sslog.rdbuf()->in_avail() > 0) ? catched_log = true : catched_log = false;
-    if (catched_log) ui->textBrowser->setTextColor(Qt::green);
-    while (sslog.rdbuf()->in_avail() > 0) {
-        ui->textBrowser->insertPlainText(mygetline(sslog)); //докинуть в текстбраузер
-    }
-    if (catched_err || catched_log) {
-        ui->textBrowser->setTextColor(Qt::white);
-        ui->textBrowser->update(); // обновить браузер
-    }
+    streamBufferToBrowser(sserr, Qt::red);
+    streamBufferToBrowser(sslog, Qt::green);
     timerCerr->start(timerDelay);
 }
 
@@ -155,6 +135,26 @@ QString MainWindow::mygetline(std::stringstream &s)
 {
     std::string line; // стандартная строка для getline
     getline(s, line); // выдернуть одну строку
-    line += '\n'; // добавить конец строки, а то он теряется в гетлайне
+//    line += '\n'; // добавить конец строки, а то он теряется в гетлайне
     return QString::fromStdString(line); // переделать в qt-формат
 }
+
+void MainWindow::oneLinefromStreamToBrowser(std::stringstream &s)
+{
+    QString line = mygetline(s);
+    line.push_back("\n");
+    ui->textBrowser->insertPlainText(line);
+}
+
+void MainWindow::streamBufferToBrowser(std::stringstream &s, Qt::GlobalColor color)
+{
+    bool catched     = false;
+    (s.rdbuf()->in_avail() > 0) ? catched = true : catched = false;
+    if (catched && color != Qt::white) ui->textBrowser->setTextColor(color);
+    while (s.rdbuf()->in_avail() > 0) {
+        oneLinefromStreamToBrowser(s);
+    }
+    if (catched && color != Qt::white) ui->textBrowser->setTextColor(Qt::white);
+    if (catched)  ui->textBrowser->update();
+}
+

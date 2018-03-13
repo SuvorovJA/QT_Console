@@ -23,6 +23,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+
+
 private:
     Ui::MainWindow *ui;
     // перенаправление cout, приватные поля класса, буфера стрингстрим
@@ -32,9 +34,13 @@ private:
     std::stringstream sslog;
     // прочий приватный staff
     QString mygetline(std::stringstream &);
+    void oneLinefromStreamToBrowser(std::stringstream &);
+    void streamBufferToBrowser(std::stringstream &, Qt::GlobalColor);
     QTimer *timerCout;
     QTimer *timerCerr;
     int timerDelay = 500;
+
+
 
 protected slots:
     void startButtonClicked();
