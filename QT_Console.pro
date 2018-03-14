@@ -26,11 +26,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    mymain.cpp
+    mymain.cpp \
+    streamscatcher.cpp \
+    dialogboxss.cpp
 
 HEADERS += \
         mainwindow.h \
-    mymain.h
+    mymain.h \
+    streamscatcher.h \
+    dialogboxss.h
 
 FORMS += \
         mainwindow.ui

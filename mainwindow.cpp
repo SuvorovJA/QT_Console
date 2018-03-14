@@ -6,29 +6,45 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include "mymain.h"
+
+#include "streamscatcher.h"
+#include "dialogboxss.h"
+
 #include "QTimer"
-#include <string>
-#include <sstream>
-#include <iostream>
+#include "QInputDialog"
+
+//инициализация статического поля класса
+DialogBoxSS *MainWindow::dbholder = new DialogBoxSS();
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
+    // объект StreamsCatcher
+    scholder = new StreamsCatcher();
+
     // таймер для мониторинга буферов перехвата cout cin
     // разделения таймеров сделано для ловли бага (см. readme)
-    timerCout = new QTimer(this);
-    timerCerr = new QTimer(this); // clog путь будет здесь-же
-    connect(timerCout, SIGNAL(timeout()), this, SLOT(catchStreamCout()));
-    connect(timerCerr, SIGNAL(timeout()), this, SLOT(catchStreamCerr()));
-    timerCout->start(timerDelay);
-    timerCerr->start(timerDelay);
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), scholder, SLOT(catchStream()));
+    timer->start(timerDelay);
 
     // соединения слотов и сигналов QT
     connect(ui->startButton, SIGNAL(clicked(bool)), this, SLOT(startButtonClicked()));
     connect(ui->cBoxFontSizes, SIGNAL(currentIndexChanged(int)), this, SLOT(cBoxFontSizesSelected()));
     connect(ui->fontComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(fontComboBoxSelected()));
+
+    // соединения слотов и сигналов DialogBoxSS
+    connect(this, SIGNAL(returnDialogBoxCancelledSignal()), this->dbholder, SLOT(returnDialogBoxCancelledSlot()));
+    connect(this, SIGNAL(returnDialogBoxSignal(std::string)), dbholder, SLOT(returnDialogBoxSlot(std::string)));
+    connect(dbholder, SIGNAL(inputDialogBoxSignal(const std::string &)), this, SLOT(inputDialogBoxSlot(const std::string &)));
+    // соединения слотов и сигналов StreamsCatcher
+    connect(scholder, SIGNAL(timerStartSignal()), this, SLOT(timerStartSlot()));
+    connect(scholder, SIGNAL(timerStopSignal()), this, SLOT(timerStopSlot()));
+    connect(scholder, SIGNAL(insertPlainTextSignal(QString)), this, SLOT(insertPlainTextSlot(QString)));
+    connect(scholder, SIGNAL(setTextColorSigal(Qt::GlobalColor)), this, SLOT(setTextColorSlot(Qt::GlobalColor)));
 
     // заполнение размера шрифтов в комбобокс
     ui->cBoxFontSizes->addItems({"7", "9", "11", "14", "16", "18"});
@@ -40,12 +56,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->textBrowser->setTextBackgroundColor(Qt::black);
     ui->textBrowser->setStyleSheet("background-color: black;");
 
-    // перехват потоков cin cout cerr clog
-//    std::cin.rdbuf(ssin.rdbuf()); //redirect std::cin
-    std::cout.rdbuf(ssout.rdbuf()); //redirect std::cout
-    std::cerr.rdbuf(sserr.rdbuf()); //redirect std::cerr
-    std::clog.rdbuf(sslog.rdbuf()); //redirect std::clog
-
 }
 
 MainWindow::~MainWindow()
@@ -55,7 +65,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::startButtonClicked()
 {
-
     //выключить стартовую кнопку
     // ui->startButton->setDisabled(true);
     //очистить поле текста и статусбар
@@ -112,49 +121,36 @@ void MainWindow::fontComboBoxSelected()
     ui->textBrowser->update();
 }
 
+// StreamsCatcher Slot/Signals
 
-//
-
-
-void MainWindow::catchStreamCout() // этот метод запускается по таймеру
+void MainWindow::insertPlainTextSlot(const QString &line)
 {
-    timerCout->stop(); // выключить таймер пока мы тут
-    streamBufferToBrowser(ssout, Qt::white);
-    timerCout->start(timerDelay); // включить таймер назад
-}
-
-void MainWindow::catchStreamCerr() // этот метод запускается по таймеру
-{
-    timerCerr->stop();
-    streamBufferToBrowser(sserr, Qt::red);
-    streamBufferToBrowser(sslog, Qt::green);
-    timerCerr->start(timerDelay);
-}
-
-QString MainWindow::mygetline(std::stringstream &s)
-{
-    std::string line; // стандартная строка для getline
-    getline(s, line); // выдернуть одну строку
-//    line += '\n'; // добавить конец строки, а то он теряется в гетлайне
-    return QString::fromStdString(line); // переделать в qt-формат
-}
-
-void MainWindow::oneLinefromStreamToBrowser(std::stringstream &s)
-{
-    QString line = mygetline(s);
-    line.push_back("\n");
     ui->textBrowser->insertPlainText(line);
+    ui->textBrowser->update();
 }
 
-void MainWindow::streamBufferToBrowser(std::stringstream &s, Qt::GlobalColor color)
+void MainWindow::setTextColorSlot(const Qt::GlobalColor &color)
 {
-    bool catched     = false;
-    (s.rdbuf()->in_avail() > 0) ? catched = true : catched = false;
-    if (catched && color != Qt::white) ui->textBrowser->setTextColor(color);
-    while (s.rdbuf()->in_avail() > 0) {
-        oneLinefromStreamToBrowser(s);
-    }
-    if (catched && color != Qt::white) ui->textBrowser->setTextColor(Qt::white);
-    if (catched)  ui->textBrowser->update();
+    ui->textBrowser->setTextColor(color);
+    ui->textBrowser->update();
 }
 
+void MainWindow::timerStopSlot()
+{
+    timer->stop();
+}
+
+void MainWindow::timerStartSlot()
+{
+    timer->start(timerDelay);
+}
+
+void MainWindow::inputDialogBoxSlot(const std::string &message)
+{
+    QString msg = QString::fromStdString(message);
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"), msg, QLineEdit::Normal, tr(""), &ok);
+    if (ok && !text.isEmpty()) emit returnDialogBoxSignal(text.toStdString());
+    if (!ok || text.isEmpty()) emit returnDialogBoxCancelledSignal();
+    // what about any time go here ?
+}
