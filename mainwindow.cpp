@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // заполнение размера шрифтов в комбобокс
     ui->cBoxFontSizes->addItems({"7", "9", "11", "14", "16", "18"});
-    ui->cBoxFontSizes->setCurrentIndex(3); // 14й шрифт выбрать
+    ui->cBoxFontSizes->setCurrentIndex(2); // 14й шрифт выбрать
     // в списке шрифтов показать только моноширинные
     ui->fontComboBox->setFontFilters(QFontComboBox::MonospacedFonts);
     // цвет фона и шрифта для "консоли"

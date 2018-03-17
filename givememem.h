@@ -32,17 +32,49 @@
  * 4) void copyFrom* | const GiveMeMem& - источник для копии
  *
  * перегруженный метод операций
- * public do(enum OperationType, returned*, int sizeOfReturn [, copyFrom* | const GiveMeMem&])
+ * public bool do(enum OperationType, returned*, int sizeOfReturn [, copyFrom* | const GiveMeMem&])
+ * returned isOk()
  * этот же метод используется в конструкторах
  *
  */
+
+
+// TODO replace to member field with setter
+#define GIVEMEMEM_DEBUG 1
+
+#if GIVEMEMEM_DEBUG == 1
+#include <string>
+#include <sstream>
+#endif
 
 
 class GiveMeMem
 {
 public:
 
+    enum class Operation { ALLOCATE, REALLOCATE, COPYEXT, COPYMEMBER, RELEASE };
     GiveMeMem();
-};
+    GiveMeMem(Operation, void *, int *); // ALLOCATE, REALLOCATE
+    GiveMeMem(Operation, void *, int *, void *); // COPYEXT, COPYMEMBER
+    bool doit(Operation, void *, int *); // ALLOCATE, REALLOCATE
+    bool doit(Operation, void *, int *, void *); // COPYEXT, COPYMEMBER
+    bool doit(Operation, void *); // RELEASE
+    bool doit(Operation); // RELEASE
+    bool isOk();
+    unsigned int size();
+    ~GiveMeMem();
 
+private:
+
+    bool isSuccessful;
+    void *memholder;
+    unsigned int sizeOfHoldedMem;
+#if GIVEMEMEM_DEBUG == 1
+    void dbgMsg(const std::string &);
+    std::string toStr(void *);
+    std::string toStr(Operation);
+    std::string toStr(int); // TODO template function use
+#endif
+
+};
 #endif // GIVEMEMEM_H
