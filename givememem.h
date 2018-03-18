@@ -12,6 +12,8 @@
  * хранится поле удачи, тип bool, удачна ли последняя операция или нет. метод isOk()
  * при isOk() = false -- возвращаемый указатель null
  *
+ * метод access() - возвращает указатель на выделенную память
+ *
  * высвобождение памяти в деструкторе, метод release(GiveMeMem*) - освобождает память,
  *                                  обнуляет указатель, вызывает деструктор
  *
@@ -48,20 +50,27 @@
 #endif
 
 
+
 class GiveMeMem
 {
 public:
 
     enum class Operation { ALLOCATE, REALLOCATE, COPYEXT, COPYMEMBER, RELEASE };
     GiveMeMem();
-    GiveMeMem(Operation, void *, int *); // ALLOCATE, REALLOCATE
-    GiveMeMem(Operation, void *, int *, void *); // COPYEXT, COPYMEMBER
-    bool doit(Operation, void *, int *); // ALLOCATE, REALLOCATE
-    bool doit(Operation, void *, int *, void *); // COPYEXT, COPYMEMBER
-    bool doit(Operation, void *); // RELEASE
-    bool doit(Operation); // RELEASE
+    GiveMeMem(Operation, const int &); // ALLOCATE, REALLOCATE
+    GiveMeMem(Operation, const int &, void *); // COPYEXT, COPYMEMBER
+    //
+    bool doit(Operation, const int &); // ALLOCATE, REALLOCATE
+    bool doit(Operation, const int &, void *); // COPYEXT, COPYMEMBER
+    //
+    bool doit(Operation, void
+              *); // RELEASE (освобождается память по указателю, обязательно должна принадлежать объекту)
+    bool doit(Operation); // RELEASE (освобождается память занятая объектом)
+    //
+
     bool isOk();
-    unsigned int size();
+    void *access();
+    unsigned int getSize();
     ~GiveMeMem();
 
 private:
@@ -69,9 +78,15 @@ private:
     bool isSuccessful;
     void *memholder;
     unsigned int sizeOfHoldedMem;
+    //
+    bool getMem(const int &size); // alloc mem
+    bool cleanMem(); // memholder clean
+    bool copyMem(const void *, const unsigned int &); // copy size from void* to memholder
+    //
 #if GIVEMEMEM_DEBUG == 1
     void dbgMsg(const std::string &);
     std::string toStr(void *);
+    std::string toStr(const void *&);
     std::string toStr(Operation);
     std::string toStr(int); // TODO template function use
 #endif
