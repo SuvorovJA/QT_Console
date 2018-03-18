@@ -5,12 +5,14 @@
 #include <sstream>
 
 #include"givememem.h"
+#include"logotyp.h"
 
 using namespace std;
 int mymain(int argc, char **argv)
 {
-    // DEMO LAB 6H
-
+    // DEMO LAB 6H (use font similar as Courier New)
+    LogoTyp *logo = new LogoTyp();
+    logo->print();
 
     // DEMO LAB 5H
 

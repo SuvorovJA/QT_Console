@@ -29,14 +29,16 @@ SOURCES += \
     mymain.cpp \
     streamscatcher.cpp \
     dialogboxss.cpp \
-    givememem.cpp
+    givememem.cpp \
+    logotyp.cpp
 
 HEADERS += \
         mainwindow.h \
     mymain.h \
     streamscatcher.h \
     dialogboxss.h \
-    givememem.h
+    givememem.h \
+    logotyp.h
 
 FORMS += \
         mainwindow.ui
