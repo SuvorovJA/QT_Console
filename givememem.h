@@ -14,42 +14,35 @@
  *
  * метод access() - возвращает указатель на выделенную память
  *
- * высвобождение памяти в деструкторе, метод release(GiveMeMem*) - освобождает память,
+ * метод release() - освобождает память, высвобождение памяти в деструкторе,
  *                                  обнуляет указатель, вызывает деструктор
  *
  * - при создании всегда делается инициализация памяти 0
- * - всегда проверка границ
+ * - всегда проверка границ  // TODO?
  *
  * конструкторы:
- *  - создать пустой, потом вызвать ресайз или копию
+ *  - создать пустой, потом вызвать реаллокейт или копию
  *  - создать конкретный
  *  - создать конкретный используя копию
  *
  * params
  * 1) enum class OperationType - тип операции, (не особо нужен, но чтобы в коде было видно
  *              тип операции, можно в private method использовать в switch)
- * 2) void returned* - возврат. указатель на память (TODO лучше не void* а шаблонным образом
- *              передавать типизированный указатель)
- * 3) int sizeOfReturn - количество памяти размерности sizeof(парам2)
- * 4) void copyFrom* | const GiveMeMem& - источник для копии
+ * 2) int sizeOfReturn - количество памяти размерности sizeof(парам2)
+ * 3) void copyFrom* | const GiveMeMem& - источник для копии
+ *  ps: возврата указателя на выделенную память нет, есть access()
  *
  * перегруженный метод операций
- * public bool do(enum OperationType, returned*, int sizeOfReturn [, copyFrom* | const GiveMeMem&])
+ * public bool do(enum OperationType, int sizeOfReturn [, copyFrom* ])
  * returned isOk()
  * этот же метод используется в конструкторах
  *
+ * static флаг debugEnabled - вкл/выкл диагностических сообщений, метод setDebug(bool);
+ *
  */
 
-
-// TODO replace to member field with setter
-#define GIVEMEMEM_DEBUG 1
-
-#if GIVEMEMEM_DEBUG == 1
 #include <string>
 #include <sstream>
-#endif
-
-
 
 class GiveMeMem
 {
@@ -64,7 +57,7 @@ public:
     bool doit(Operation, const int &, void *); // COPYEXT, COPYMEMBER
     //
     bool doit(Operation, void
-              *); // RELEASE (освобождается память по указателю, обязательно должна принадлежать объекту)
+              *); // RELEASE (освобождается память по указателю, должна принадлежать объекту)
     bool doit(Operation); // RELEASE (освобождается память занятая объектом)
     //
 
@@ -72,6 +65,7 @@ public:
     void *access();
     unsigned int getSize();
     ~GiveMeMem();
+    static void setDebug(bool);
 
 private:
 
@@ -79,17 +73,16 @@ private:
     void *memholder;
     unsigned int sizeOfHoldedMem;
     //
-    bool getMem(const int &size); // alloc mem
+    static bool debugEnabled;
+    //
+    bool getMem(const int &size); // alloc mem to memholder
     bool cleanMem(); // memholder clean
     bool copyMem(const void *, const unsigned int &); // copy size from void* to memholder
     //
-#if GIVEMEMEM_DEBUG == 1
     void dbgMsg(const std::string &);
-    std::string toStr(void *);
+    std::string toStr(void *);          // TODO template function use
     std::string toStr(const void *&);
     std::string toStr(Operation);
-    std::string toStr(int); // TODO template function use
-#endif
-
+    std::string toStr(int);
 };
 #endif // GIVEMEMEM_H

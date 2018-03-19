@@ -16,6 +16,8 @@ int mymain(int argc, char **argv)
 
     // DEMO LAB 5H
 
+    GiveMeMem::setDebug(true);
+
     cout << " ======== simple create and destroy, without allocate mem =========" << endl;
     int somevar = 0;
     cout << "> create without params " << endl;
@@ -29,7 +31,9 @@ int mymain(int argc, char **argv)
     ptr1->doit(GiveMeMem::Operation::RELEASE, ptr1);
     cout << "> release without ptr " << endl;
     ptr1 = new GiveMeMem();
+    ptr1->doit(GiveMeMem::Operation::RELEASE);
     cout << "> release without ptr, incorrect Operation " << endl;
+    ptr1 = new GiveMeMem();
     ptr1->doit(GiveMeMem::Operation::COPYEXT);
     cout << " ======== allocate mem =========" << endl;
     ptr1->doit(GiveMeMem::Operation::ALLOCATE, 10 * sizeof(int));
@@ -97,7 +101,15 @@ int mymain(int argc, char **argv)
         cout << tenOfInt[i] << " ";
     }
     cout << endl;
-
+    ptr1->doit(GiveMeMem::Operation::RELEASE);
+    ptr3->doit(GiveMeMem::Operation::RELEASE);
+    // check killing obj
+    cout << ptr1->getSize() << " " << ptr1->access() << endl; // why object still exists?
+    cout << ptr3->getSize() << " " << ptr3->access() << endl;
+    ptr1->~GiveMeMem();
+    ptr3->~GiveMeMem();
+    cout << ptr1->getSize() << " " << ptr1->access() << endl; // why object still exists?
+    cout << ptr3->getSize() << " " << ptr3->access() << endl;
     return 0;
 
 }
