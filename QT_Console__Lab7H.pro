@@ -29,14 +29,16 @@ SOURCES += \
     mymain.cpp \
     streamscatcher.cpp \
     dialogboxss.cpp \
-    contents.cpp
+    contents.cpp \
+    exchangeproto.cpp
 
 HEADERS += \
         mainwindow.h \
     mymain.h \
     streamscatcher.h \
     dialogboxss.h \
-    contents.h
+    contents.h \
+    exchangeproto.h
 
 FORMS += \
         mainwindow.ui
