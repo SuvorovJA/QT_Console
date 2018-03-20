@@ -21,8 +21,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    friend class StreamsCatcher;
-    friend class DialogBoxSS;
+//    friend class StreamsCatcher;
+//    friend class DialogBoxSS;
 
 public:
     explicit MainWindow(QWidget *parent = 0);

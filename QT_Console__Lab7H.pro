@@ -28,13 +28,15 @@ SOURCES += \
         mainwindow.cpp \
     mymain.cpp \
     streamscatcher.cpp \
-    dialogboxss.cpp
+    dialogboxss.cpp \
+    contents.cpp
 
 HEADERS += \
         mainwindow.h \
     mymain.h \
     streamscatcher.h \
-    dialogboxss.h
+    dialogboxss.h \
+    contents.h
 
 FORMS += \
         mainwindow.ui
