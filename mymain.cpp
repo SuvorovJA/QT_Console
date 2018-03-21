@@ -22,6 +22,7 @@ int mymain(int argc, char **argv)
             break;
         case '3':
             cout << "3:" << endl;
+            cout << "мне кажется это всё проделано в 4";
             break;
         case '4':
             cout << "4:" << endl;
