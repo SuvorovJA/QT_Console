@@ -30,7 +30,8 @@ SOURCES += \
     streamscatcher.cpp \
     dialogboxss.cpp \
     contents.cpp \
-    exchangeproto.cpp
+    exchangeproto.cpp \
+    rational.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,7 +39,8 @@ HEADERS += \
     streamscatcher.h \
     dialogboxss.h \
     contents.h \
-    exchangeproto.h
+    exchangeproto.h \
+    rational.h
 
 FORMS += \
         mainwindow.ui

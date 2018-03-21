@@ -12,12 +12,12 @@ public:
     enum Commands { ON, OFF, RUN, STOP, SIZE, VALUE, NAME, TIME }; // до 16 команд
 
 #pragma pack(push, 1)
-    struct ExchangePackMessageAlignmentOneByte {
+    struct ExchangePackMessageAlignmentOneByte { // 1+1+2+1+8 = 13 bytes
         bool direction: 1 ; // 0 - request, 1 - answer
         TypesMessage typeOfMessage: 3; // тип сообщения сенсору/серверу
         Commands command: 4; // команда сенсору/серверу
         uint8_t idOfSensor; // номер опрашиваемого сенсора / номер сенсора отправляющего данные
-        uint32_t simplecrc = 0; // простая контрольная сумма пакета при simplecrc=0
+        uint16_t simplecrc = 0; // простая контрольная сумма пакета при simplecrc=0
         uint8_t payloadLength; // размер нагрузки
         uint8_t *payload;   // здесь видимо только указателем
         /* uint8_t payload[1]; // полезные данные вариативной длинны, нет, =1!
@@ -26,15 +26,17 @@ public:
     };
 #pragma pack(pop)
 
-    struct ExchangePackMessageNonAlignment {
+    struct ExchangePackMessageNonAlignment { // 1+1+2+1+3? = 8 bytes?
         bool direction: 1 ; // 0 - request, 1 - answer
         TypesMessage typeOfMessage: 3; // тип сообщения сенсору/серверу
         Commands command: 4; // команда сенсору/серверу
         uint8_t idOfSensor; // номер опрашиваемого сенсора / номер сенсора отправляющего данные
-        uint32_t simplecrc; // простая контрольная сумма пакета
+        uint16_t simplecrc; // простая контрольная сумма пакета
         uint8_t payloadLength; // размер нагрузки
         uint8_t payload[]; // полезные данные вариативной длинны
     };
+
+    int dummy = 0xAA; // placeholder for mem debug
 
     typedef   ExchangePackMessageAlignmentOneByte EPMa;
     typedef   ExchangePackMessageNonAlignment EPMna;

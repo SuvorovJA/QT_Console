@@ -1,10 +1,11 @@
 #include"mymain.h"
 #include"contents.h"
 #include"exchangeproto.h"
+#include"rational.h"
 
 #include <iostream>
-#include <iomanip>
-#include <sstream>
+//#include <iomanip>
+//#include <sstream>
 using namespace std;
 int mymain(int argc, char **argv)
 {
@@ -19,6 +20,7 @@ int mymain(int argc, char **argv)
         switch (num) {
         case '2':
             cout << "2:" << endl;
+            Rational::Test();
             break;
         case '3':
             cout << "3:" << endl;
